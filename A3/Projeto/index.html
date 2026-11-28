@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador CLP — Controle de Tanque de Água</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+<header>
+  <div>
+    <h1>Sistema Automatizado de Controle de Tanque de Água</h1>
+  </div>
+  <div class="hstat">
+    <span>Tempo <b id="hTime">00:00</b></span>
+    <span>Varredura <b>50 ms</b></span>
+    <span>Rungs <b id="hRungs"></b></span>
+    <span>Modo <b id="hMode">—</b></span>
+    <!-- <a href="fiddle.html" style="color:#8cc3ef">Ladder no visual PLC Fiddle →</a> -->
+  </div>
+</header>
+
+<main>
+  <div class="col">
+    <section class="panel">
+      <div class="status" id="status">Sistema desligado</div>
+      <svg id="tank" viewBox="0 0 440 430" role="img" aria-label="Tanque de água com sensores, bomba e válvulas">
+        <rect x="18" y="360" width="116" height="56" rx="4" fill="#d5e7f6" stroke="#56616b" stroke-width="2"/>
+        <rect x="20" y="378" width="112" height="36" fill="var(--water)" opacity=".55"/>
+        <text x="76" y="374" text-anchor="middle" class="svgLbl">Cisterna</text>
+        <path class="pipe" d="M75 362 V340"/>
+        <path class="pipe" d="M75 296 V38 H180 V62"/>
+        <path class="flow" id="fIn" d="M75 362 V340 M75 296 V38 H180 V62"/>
+        <g id="pump">
+          <circle id="pumpBody" cx="75" cy="318" r="22"/>
+          <g id="impeller"><path d="M75 304 L79 318 L75 332 L71 318Z M61 318 L75 314 L89 318 L75 322Z" fill="#56616b"/></g>
+        </g>
+        <text x="36" y="268" class="svgLbl" text-anchor="middle">Bomba</text>
+        <text x="36" y="282" class="svgMono" text-anchor="middle" id="pCmd">cmd Q0.0: 0</text>
+        <text x="36" y="295" class="svgMono" text-anchor="middle" id="pFb">ret I1.2: 0</text>
+        <rect x="150" y="60" width="160" height="320" rx="3" fill="#fff" stroke="#3a444d" stroke-width="3"/>
+        <clipPath id="tclip"><rect x="152" y="62" width="156" height="316"/></clipPath>
+        <g clip-path="url(#tclip)">
+          <rect id="water" x="150" y="220" width="160" height="160" fill="var(--water)" opacity=".85"/>
+          <rect id="waterTop" x="150" y="220" width="160" height="4" fill="#8cc3ef"/>
+        </g>
+        <text id="lvlTxt" x="230" y="215" text-anchor="middle" style="font-family:var(--mono);font-size:15px;font-weight:600" fill="#1c2329">50%</text>
+        <path class="pipe" d="M150 92 H110 V362"/>
+        <path class="flow" id="fDr" d="M150 92 H110 V362"/>
+        <g class="valve" id="vDr" transform="translate(128 92)"><path d="M-9 -8 L9 8 L9 -8 L-9 8Z"/></g>
+        <text x="128" y="78" class="svgLbl" text-anchor="middle">Dreno</text>
+        <text x="130" y="116" class="svgMono" text-anchor="middle" fill="#5d6974">Q0.1</text>
+        <path class="pipe" d="M310 368 H370 V418"/>
+        <path class="flow" id="fOut" d="M310 368 H370 V418"/>
+        <g class="valve" id="vOut" transform="translate(340 368)"><path d="M-9 -8 L9 8 L9 -8 L-9 8Z"/></g>
+        <text x="340" y="392" class="svgLbl" text-anchor="middle">Consumo</text>
+        <g id="sensors"></g>
+      </svg>
+      <div class="sig" style="margin-top:8px">
+        <span class="lamp g" id="lG"><i></i>Verde</span>
+        <span class="lamp y" id="lY"><i></i>Amarelo</span>
+        <span class="lamp r" id="lR"><i></i>Vermelho</span>
+        <span class="lamp s" id="lS"><i></i>Sirene</span>
+        <span class="lamp b" id="lLS"><i></i>Painel</span>
+        <span class="lamp b" id="lLB"><i></i>Bomba</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Painel de comando</h2>
+      <div class="btns">
+        <button class="b-start" id="bStart">PARTIDA<small>I0.4</small></button>
+        <button class="b-stop" id="bStop">PARADA<small>I0.5</small></button>
+        <button class="b-reset" id="bReset">RESET<small>I0.7 · segure 5 s = manutenção</small><span class="prog" id="rProg"></span></button>
+        <button class="b-emerg" id="bEmerg">EMERGÊNCIA<small>I0.6 · trava</small></button>
+      </div>
+      <div class="row">
+        <label>Modo (I1.0)</label>
+        <div class="seg" style="flex:1"><button id="mAuto" class="active">Automático</button><button id="mMan">Manual</button></div>
+      </div>
+      <div class="row"><button id="bMan" style="flex:1" disabled>Bomba manual — segure<small>I1.1</small></button></div>
+      <div class="row">
+        <label for="cons">Consumo</label>
+        <input type="range" id="cons" min="0" max="3" step="0.1" value="1.5">
+        <output id="consO">1,5 %/s</output>
+      </div>
+      <div class="row">
+        <label>Velocidade</label>
+        <div class="seg" style="flex:1" id="speed"><button data-s="1" class="active">1×</button><button data-s="2">2×</button><button data-s="5">5×</button><button data-s="10">10×</button></div>
+      </div>
+    </section>
+
+    <section class="panel faults">
+      <h2>Injeção de falhas (ao vivo)</h2>
+      <div id="faultList"></div>
+      <div class="row">
+        <button class="small-btn" id="lvLow">Nível → 20%</button>
+        <button class="small-btn" id="lvHigh">Nível → 75%</button>
+        <button class="small-btn" id="restart">Reiniciar</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="col">
+    <section class="panel">
+      <h2>Entradas e saídas — estado ao vivo</h2>
+      <div class="io">
+        <div><h3>Entradas (I)</h3><ul class="iol" id="ioIn"></ul></div>
+        <div><h3>Saídas (Q)</h3><ul class="iol" id="ioOut"></ul></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="tabs" role="tablist">
+        <button class="active" data-v="vLad">Ladder ao vivo</button>
+        <button data-v="vTest">Testes de falhas</button>
+        <button data-v="vVar">Memórias, timers e contadores</button>
+        <button data-v="vLog">Eventos</button>
+      </div>
+      <div class="view active" id="vLad">
+        <div class="legend">
+          <span><i></i>energizado / contato fechado</span>
+          <span><i class="off"></i>sem energia</span>
+        </div>
+        <div id="ladder"></div>
+      </div>
+      <div class="view" id="vTest">
+        <div class="note">Cada teste reinicia um CLP virtual, injeta a falha, executa a lógica em alta velocidade e confere o comportamento esperado. Não altera a simulação ao vivo. Use <b>Ver ao vivo</b> para montar o mesmo cenário no tanque e acompanhar no Ladder.</div>
+        <div class="tbar-top"><button id="runAll">Executar todos os testes</button><span class="tsum" id="tSum"></span></div>
+        <div id="tests"></div>
+      </div>
+      <div class="view" id="vVar">
+        <div class="note">No PLC Fiddle os temporizadores expõem o bit <code>.Q</code> (ex.: <code>T_ALTO.Q</code>) e o contador é zerado por uma instrução <b>Reset</b> em rung separado — exatamente como está aqui.</div>
+        <h3 class="s">Memórias internas (M)</h3><div class="tscroll"><table id="tMem"></table></div>
+        <h3 class="s">Temporizadores (TON)</h3><div class="tscroll"><table id="tTon"></table></div>
+        <h3 class="s">Contadores (CTU)</h3><div class="tscroll"><table id="tCtu"></table></div>
+      </div>
+      <div class="view" id="vLog"><ul id="log"></ul></div>
+    </section>
+  </div>
+</main>
+
+<!-- Lógica (independente da interface) -->
+<script src="js/clp.js"></script>
+<script src="js/planta.js"></script>
+<script src="js/testes.js"></script>
+<!-- Parte visual -->
+<script src="js/interface.js"></script>
+</body>
+</html>

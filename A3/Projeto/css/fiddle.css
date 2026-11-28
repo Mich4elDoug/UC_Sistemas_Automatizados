@@ -1,0 +1,59 @@
+/* PARTE VISUAL — Ladder no visual do PLC Fiddle */
+*{box-sizing:border-box}
+body{margin:0;background:#ececec;font-family:"Times New Roman",Times,serif;color:#333}
+.topbar{background:#fff;border-bottom:3px solid #bbb;padding:8px 16px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;font-family:Arial,Helvetica,sans-serif;font-size:13px}
+.topbar b{font-size:14px}
+.topbar a{color:#3d7cd6}
+.topbar label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.topbar .hint{color:#777;font-size:12px}
+.wrap{display:flex;gap:20px;padding:10px 8px 40px;align-items:flex-start}
+/* painel de variáveis */
+.vars{width:236px;flex:none;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.25);padding:10px 10px 16px;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow:auto}
+.addrow{display:grid;grid-template-columns:1fr 44px;gap:6px;margin-bottom:12px}
+.addrow input{height:21px;border:1px solid #767676;font-size:13px}
+.addrow select{font-size:13px;width:72px}
+.addrow button{grid-row:1/3;grid-column:2;background:#3d7cd6;color:#fff;border:0;font-family:Arial,sans-serif;font-size:13px;opacity:.85;cursor:not-allowed}
+.vgrp{font-family:Arial,sans-serif;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#999;margin:12px 0 2px 4px}
+.var{display:flex;align-items:center;gap:7px;padding:5px 2px 5px 18px;font-size:15px;line-height:1.1}
+.var .x{width:21px;height:21px;border:1px solid #555;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none;color:#555}
+.var .nm{white-space:nowrap}
+.var .st{border:2px solid #555;border-radius:3px;padding:0 3px;font-size:14px;min-width:34px;text-align:center;flex:none;background:#fff}
+.var.in .st{cursor:pointer}
+.var.in .st:hover{background:#f2f2f2}
+.var.on .st{border-color:#00a000;color:#00a000}
+.var .tv{font-family:Arial,sans-serif;font-size:11.5px;color:#555;border:1px solid #bbb;border-radius:3px;padding:1px 4px;white-space:nowrap}
+.var.q .tv{border-color:#00a000;color:#00a000}
+.var.forced .nm{color:#c00}
+/* área da direita */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;gap:14px}
+.palette{background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.25)}
+.ptabs{display:flex;gap:4px;background:#ececec;padding-top:2px}
+.ptabs span{background:#9c9c9c;color:#333;padding:2px 6px;font-size:15px;border:1px solid #888;border-bottom:0;cursor:pointer}
+.ptabs span.act{background:#fff;color:#333}
+.pbody{display:flex;justify-content:space-around;flex-wrap:wrap;gap:10px;padding:16px 10px 12px;min-height:92px;align-items:center}
+.pitem{display:flex;flex-direction:column;align-items:center;gap:4px;font-family:Arial,sans-serif;font-size:11.5px;color:#666;text-align:center;max-width:220px}
+.pitem .sel{opacity:.6}
+.ladder{background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.25);padding:10px 14px;overflow-x:auto}
+.rung{position:relative}
+.rung svg{position:absolute;left:0;top:0;overflow:visible}
+.rnum{position:absolute;left:-2px;top:2px;font-family:Arial,sans-serif;font-size:10.5px;color:#aaa}
+.rcmt{position:absolute;left:22px;top:2px;font-family:Arial,sans-serif;font-size:11px;color:#9a9a9a;font-style:italic;white-space:nowrap}
+.rgrp{font-family:Arial,sans-serif;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#777;padding:10px 0 4px 26px;border-left:5px solid #555;margin-left:8px}
+.rgrp:first-child{padding-top:4px}
+/* "select" do PLC Fiddle */
+.sel{position:absolute;height:24px;border:1px solid #767676;border-radius:2px;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:12.5px;color:#000;padding:4px 18px 0 4px;white-space:nowrap;overflow:hidden}
+.sel::after{content:'';position:absolute;right:6px;top:9px;border:4px solid transparent;border-top:5px solid #222}
+.pitem .sel{position:relative;height:22px;font-size:12px;color:#777;border-color:#bbb}
+/* SVG */
+.w{stroke:#555;stroke-width:1.5;fill:none}
+.rail{stroke:#555;stroke-width:5}
+.ct line{stroke:#333;stroke-width:1.6}
+.ct.cl line{stroke:#00c000;stroke-width:2}
+.coil circle{fill:#fff;stroke:#555;stroke-width:1.6}
+.coil.on circle{fill:#00c000;stroke:#008a00}
+.blk rect{fill:#fff;stroke:#555;stroke-width:1.5}
+.blk.on rect{stroke:#00a000}
+.blk.q rect{stroke:#00c000;stroke-width:2.5}
+.bt{font-family:"Times New Roman",serif;font-size:11px;fill:#666}
+.bv{font-family:Arial,sans-serif;font-size:10.5px;fill:#555}
+.blk.q .bv{fill:#008a00}
