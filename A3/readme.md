@@ -16,7 +16,9 @@ O projeto implementa, em linguagem **Ladder**, um sistema que controla o nível 
  ┃ ┗ 📄 Edital do projeto (PDF)
  ┣ 📂 Documentacao
  ┃ ┣ 📄 Relatório técnico do grupo (PDF)
- ┃ ┗ 📄 Programa Ladder do PLC Fiddle (.plcfiddle)
+ ┃ ┣ 📄 Programa Ladder do PLC Fiddle (.plcfiddle)
+ ┃ ┣ 📄 Apresentacao do projeto (PPT)
+ ┃ ┗ 📄 Ladder do Projeto (PDF)
  ┗ 📂 Projeto
    ┣ 📄 index.html          → simulador visual do tanque
    ┣ 📂 css
